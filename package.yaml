@@ -21,6 +21,21 @@ description:         Please see the README on GitHub at <https://github.com/gith
 
 dependencies:
 - base >= 4.7 && < 5
+- array
+- aeson
+- ghc
+- ghc-prof
+- ghc-paths
+- directory
+- filepath
+- text
+- containers
+- lens
+- hasbolt
+- hasbolt-extras
+- data-default
+- bytestring
+- utf8-string
 
 library:
   source-dirs: src

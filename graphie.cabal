@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: bb4c026d46f6f6f1421597ceb30b29a08717ae1f3143b1063c833f611da86d5d
+-- hash: 110fc80f0ac8f874496790e6bcd9fe43f9b19b41df55b408a47a39c73bcf0bef
 
 name:           graphie
 version:        0.1.0.0
@@ -33,7 +33,22 @@ library
   hs-source-dirs:
       src
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , array
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , data-default
+    , directory
+    , filepath
+    , ghc
+    , ghc-paths
+    , ghc-prof
+    , hasbolt
+    , hasbolt-extras
+    , lens
+    , text
+    , utf8-string
   default-language: Haskell2010
 
 executable graphie-exe
@@ -44,8 +59,23 @@ executable graphie-exe
       app
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , array
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , data-default
+    , directory
+    , filepath
+    , ghc
+    , ghc-paths
+    , ghc-prof
     , graphie
+    , hasbolt
+    , hasbolt-extras
+    , lens
+    , text
+    , utf8-string
   default-language: Haskell2010
 
 test-suite graphie-test
@@ -57,6 +87,21 @@ test-suite graphie-test
       test
   ghc-options: -threaded -rtsopts -with-rtsopts=-N
   build-depends:
-      base >=4.7 && <5
+      aeson
+    , array
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , data-default
+    , directory
+    , filepath
+    , ghc
+    , ghc-paths
+    , ghc-prof
     , graphie
+    , hasbolt
+    , hasbolt-extras
+    , lens
+    , text
+    , utf8-string
   default-language: Haskell2010
