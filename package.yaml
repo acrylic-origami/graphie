@@ -1,10 +1,10 @@
 name:                graphie
 version:             0.1.0.0
-github:              "githubuser/graphie"
+github:              "acrylic-origami/graphie"
 license:             BSD3
-author:              "Author name here"
-maintainer:          "example@example.com"
-copyright:           "2020 Author name here"
+author:              "Derek Lam"
+maintainer:          "derek@lam.io"
+copyright:           "2020 Derek Lam"
 
 extra-source-files:
 - README.md
@@ -17,7 +17,7 @@ extra-source-files:
 # To avoid duplicated efforts in documentation and dealing with the
 # complications of embedding Haddock markup inside cabal files, it is
 # common to point users to the README.md file.
-description:         Please see the README on GitHub at <https://github.com/githubuser/graphie#readme>
+description:         Please see the README on GitHub at <https://github.com/acrylic-origami/graphie#readme>
 
 dependencies:
 - base >= 4.7 && < 5
@@ -26,6 +26,7 @@ dependencies:
 - ghc
 - ghc-prof
 - ghc-paths
+- mtl
 - directory
 - filepath
 - text
@@ -36,6 +37,8 @@ dependencies:
 - data-default
 - bytestring
 - utf8-string
+- cassava
+- transformers
 
 library:
   source-dirs: src

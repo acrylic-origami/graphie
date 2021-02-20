@@ -17,7 +17,7 @@ GraphieTy
   1 con string
   1 path string
   1 idx int
-   ( 1 name string )
+    ( 1 name string )
   | ( 1 value (int | str) )
 GRAPHIE_AST2TY
   - GraphieAST

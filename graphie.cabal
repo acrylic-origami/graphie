@@ -4,16 +4,16 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 110fc80f0ac8f874496790e6bcd9fe43f9b19b41df55b408a47a39c73bcf0bef
+-- hash: 2f5de6168f2e4b41fcdb2cbb55879db77b80683ca33ce1f58a85014f72a1ee5e
 
 name:           graphie
 version:        0.1.0.0
-description:    Please see the README on GitHub at <https://github.com/githubuser/graphie#readme>
-homepage:       https://github.com/githubuser/graphie#readme
-bug-reports:    https://github.com/githubuser/graphie/issues
-author:         Author name here
-maintainer:     example@example.com
-copyright:      2020 Author name here
+description:    Please see the README on GitHub at <https://github.com/acrylic-origami/graphie#readme>
+homepage:       https://github.com/acrylic-origami/graphie#readme
+bug-reports:    https://github.com/acrylic-origami/graphie/issues
+author:         Derek Lam
+maintainer:     derek@lam.io
+copyright:      2020 Derek Lam
 license:        BSD3
 license-file:   LICENSE
 build-type:     Simple
@@ -23,7 +23,7 @@ extra-source-files:
 
 source-repository head
   type: git
-  location: https://github.com/githubuser/graphie
+  location: https://github.com/acrylic-origami/graphie
 
 library
   exposed-modules:
@@ -37,6 +37,7 @@ library
     , array
     , base >=4.7 && <5
     , bytestring
+    , cassava
     , containers
     , data-default
     , directory
@@ -47,7 +48,9 @@ library
     , hasbolt
     , hasbolt-extras
     , lens
+    , mtl
     , text
+    , transformers
     , utf8-string
   default-language: Haskell2010
 
@@ -63,6 +66,7 @@ executable graphie-exe
     , array
     , base >=4.7 && <5
     , bytestring
+    , cassava
     , containers
     , data-default
     , directory
@@ -74,7 +78,9 @@ executable graphie-exe
     , hasbolt
     , hasbolt-extras
     , lens
+    , mtl
     , text
+    , transformers
     , utf8-string
   default-language: Haskell2010
 
@@ -91,6 +97,7 @@ test-suite graphie-test
     , array
     , base >=4.7 && <5
     , bytestring
+    , cassava
     , containers
     , data-default
     , directory
@@ -102,6 +109,8 @@ test-suite graphie-test
     , hasbolt
     , hasbolt-extras
     , lens
+    , mtl
     , text
+    , transformers
     , utf8-string
   default-language: Haskell2010
