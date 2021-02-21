@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 2f5de6168f2e4b41fcdb2cbb55879db77b80683ca33ce1f58a85014f72a1ee5e
+-- hash: e4c6c2a21b00d4e84ab74807a521a1ad72adf377c3d9af21c144cb8fc0c07f35
 
 name:           graphie
 version:        0.1.0.0
@@ -39,14 +39,11 @@ library
     , bytestring
     , cassava
     , containers
-    , data-default
     , directory
     , filepath
     , ghc
     , ghc-paths
     , ghc-prof
-    , hasbolt
-    , hasbolt-extras
     , lens
     , mtl
     , text
@@ -68,15 +65,12 @@ executable graphie-exe
     , bytestring
     , cassava
     , containers
-    , data-default
     , directory
     , filepath
     , ghc
     , ghc-paths
     , ghc-prof
     , graphie
-    , hasbolt
-    , hasbolt-extras
     , lens
     , mtl
     , text
@@ -99,15 +93,12 @@ test-suite graphie-test
     , bytestring
     , cassava
     , containers
-    , data-default
     , directory
     , filepath
     , ghc
     , ghc-paths
     , ghc-prof
     , graphie
-    , hasbolt
-    , hasbolt-extras
     , lens
     , mtl
     , text

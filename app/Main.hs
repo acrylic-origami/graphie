@@ -20,7 +20,7 @@ import Control.Arrow ( (***), (&&&), first, second )
 import Control.Exception ( Exception(..), throw )
 import Control.Applicative ( (<|>), Alternative(..) )
 import Control.Monad ( void, zipWithM, join )
-import Data.List ( partition )
+import Data.List ( partition, intersperse )
 import Data.Maybe ( fromMaybe )
 import Data.Bitraversable ( bisequence )
 import Data.Data ( showConstr, Data(..) )
@@ -75,7 +75,7 @@ data EntityType = Neo4JNode | Neo4JRelationship
 -- core state, counting node IDs and managing file handles
 data ASTState = ASTState {
   _ast_nodeid :: Int
-  , _ast_keys :: M.Map T.Text (EntityType, M.Map (S.Set T.Text) Handle) -- label -> (entity type, params) -> node file; the second map is because some nodes have optional params that others omitted
+  , _ast_keys :: M.Map T.Text (EntityType, M.Map (S.Set T.Text) (Handle, T.Text)) -- label -> (entity type, params) -> node file; the second map is because some nodes have optional params that others omitted
 }
 makeLenses ''ASTState
 
@@ -164,7 +164,7 @@ write_entity entity_ty label magic_params params = do
         handle <- lift $ openFile fname WriteMode
         -- write header
         lift $ BL.hPut handle $ CSV.encode [header]
-        return handle
+        return (handle, T.pack fname)
       row =
         -- S label :
         M.elems magic_params
@@ -178,7 +178,7 @@ write_entity entity_ty label magic_params params = do
         ) all_params
       Nothing -> ((entity_ty, ) . M.singleton all_params) <$> m_new_file
     ) label
-  handle <- ((M.! all_params) . snd . (M.! label)) <$> gets (^. ast_keys)
+  (handle, _) <- ((M.! all_params) . snd . (M.! label)) <$> gets (^. ast_keys)
   void $ lift $ BL.hPut handle $ CSV.encode [row]
 
 write_node :: T.Text -> [(T.Text, Field)] -> ASTStateT Int
@@ -431,4 +431,23 @@ main = do
           write_rel "GRAPHIE_FILE2AST" hie_file_idx ast_idx []
         return nc''
       ) nc fhies
-    void $ mapM hClose $ concatMap (M.elems . snd) $ M.elems $ ks
+    void $ mapM (hClose . fst) $ concatMap (M.elems . snd) $ M.elems $ ks
+    putStrLn $ "neo4j-admin import " ++ concat (intersperse " " [
+        (case ty of { Neo4JNode -> "--nodes"; Neo4JRelationship -> "--relationships" })
+        ++ ":" ++ T.unpack label
+        ++ "=" ++ T.unpack fname
+        | (label, (ty, m_fs)) <- M.toList ks
+        , (_handle, fname) <- M.elems m_fs
+      ])
+    
+    -- putStrLn $ "neo4j-admin import " ++ (concat $ intersperse " " $ map (\(ty, fs) ->
+    --     (case ty of { Neo4JRelationship -> "--relationships"; Neo4JNode -> "--nodes" })
+    --     ++ ":" ++ (concat $ intersperse ":" $ map fst fs)
+    --     ++ "=\"" ++ (concat $ intersperse "," $ map snd fs) ++ "\""
+    --       )
+    --       $ M.toList $ M.fromListWith (++) $ [
+    --         (ty, [(T.unpack label, T.unpack fname)])
+    --         | (label, (ty, m_fs)) <- M.toList ks
+    --         , (_handle, fname) <- M.elems m_fs
+    --       ]
+    --   )

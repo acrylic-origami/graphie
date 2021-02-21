@@ -32,9 +32,6 @@ dependencies:
 - text
 - containers
 - lens
-- hasbolt
-- hasbolt-extras
-- data-default
 - bytestring
 - utf8-string
 - cassava
