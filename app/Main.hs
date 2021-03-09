@@ -191,7 +191,6 @@ write_node label params_raw = do
 
 write_rel :: T.Text -> Int -> Int -> [(T.Text, Field)] -> ASTStateT ()
 write_rel label from_idx to_idx params_raw = do
-  idx <- ast_nodeid <<%= (+1) -- postfix ++
   let params = M.fromList params_raw
       magic_params = M.fromList [
           ":START_ID" =: from_idx
@@ -245,7 +244,7 @@ nest lout min = do
   lout .= sout'
   pure c
 
-ast2cypher :: FilePath -> FilePath -> HieAST TypeIndex ->TyASTStateT Int -- Bolt.BoltActionT IO Int -- IO ()
+ast2cypher :: FilePath -> FilePath -> HieAST TypeIndex -> TyASTStateT Int -- Bolt.BoltActionT IO Int -- IO ()
 ast2cypher hs_path hie_path (Node {..}) = do
     let (ann_ctors, ann_tys) = both (map unpackFS) $ unzip $ S.toList $ nodeAnnotations nodeInfo -- S.toList $ S.map (("annotations" =:) . T.pack . UBL.toString . Aeson.encode . both unpackFS)
         -- (sp_fn, sp_l0, sp_ch0, sp_lf, sp_chf) = flat_realsrcspan nodeSpan
@@ -259,8 +258,8 @@ ast2cypher hs_path hie_path (Node {..}) = do
         : sp_props
       )
     
-    -- type relationships
     nest tyast_aststate $ do
+      -- type relationships
       mapM (\(pos, ty_idx) ->
           write_rel "GRAPHIE_AST2TY" ast_idx (cvt ty_idx) [
                 "pos" =: pos
@@ -270,10 +269,12 @@ ast2cypher hs_path hie_path (Node {..}) = do
       -- context relationships and misc
       mapM (\(ident, (IdentifierDetails {..})) -> do
           let ident_props = case ident of
-                Left name -> ["con" =: T.pack "Name", "name" =: uniquable2text name]
-                Right modname -> ["con" =: T.pack "ModuleName", "name" =: uniquable2text modname]
+                Right name -> ["con" =: T.pack "Name", "uniq" =: uniquable2text name, "name" =: getOccString name]
+                Left modname -> ["con" =: T.pack "ModuleName", "uniq" =: uniquable2text modname, "name" =: moduleNameString modname]
           
           ident_idx <- write_node "GraphieIdent" ident_props
+          
+          write_rel "GRAPHIE_AST2IDENT" ast_idx ident_idx []
           
           _ <- mapM (\ctx -> do
               ctx_idx <- ctxinfo2cypher ctx
@@ -338,6 +339,9 @@ ast2cypher hs_path hie_path (Node {..}) = do
 uniquable2text :: Uniquable s => s -> Text
 uniquable2text = T.pack . show . getUnique
 
+getOccString :: Name -> String
+getOccString = occNameString . nameOccName
+
 datactor2text :: Data d => d -> Text
 datactor2text = T.pack . showConstr . toConstr 
 
@@ -345,9 +349,9 @@ types2cypher :: FilePath -> [(TypeIndex, HieTypeFlat)] -> TyASTStateT () -- Bolt
 types2cypher path tys = do
   -- insert nodes first
   (M.fromList -> tymap) <- nest tyast_aststate $ mapM (\(idx, ty) -> case ty of
-      HTyVarTy (uniquable2text -> name) -> mk_ty_query idx "TyVarTy" ["name" =: name]
+      HTyVarTy name -> mk_ty_query idx "TyVarTy" ["name" =: getOccString name, "uniq" =: uniquable2text name]
       HAppTy _t0 _targs -> mk_ty_query idx "AppTy" []
-      HTyConApp (IfaceTyCon { ifaceTyConName = (uniquable2text -> name) }) _targs -> mk_ty_query idx "TyConApp" ["name" =: name]
+      HTyConApp (IfaceTyCon { ifaceTyConName }) _targs -> mk_ty_query idx "TyConApp" ["name" =: getOccString ifaceTyConName, "uniq" =: uniquable2text ifaceTyConName]
       HForAllTy _ _ -> mk_ty_query idx "ForAllTy" []
       HFunTy tyarg tyret -> mk_ty_query idx "FunTy" []
       HQualTy tyctx tyret -> mk_ty_query idx "FunTy" []
@@ -368,8 +372,8 @@ types2cypher path tys = do
   -- TODO maybe make a monad/transformer to sort these into the right order
   void $ nest tyast_aststate $ mapM (\(idx, ty) -> case ty of
       HAppTy t0 (HieArgs tn) -> mk_args_query (cvt t0) (map (second cvt) tn)
-      HTyConApp _ (HieArgs tn) -> mk_args_query (cvt idx) (map (second cvt) tn) -- (IfaceTyCon { ifaceTyConName = (uniquable2text -> name) })
-      HForAllTy ((name, ty0), argflag) ty1 -> mk_ty_rel (cvt ty0) (cvt ty1) ["name" =: uniquable2text name, "argflag" =: datactor2text argflag]
+      HTyConApp _ (HieArgs tn) -> mk_args_query (cvt idx) (map (second cvt) tn) -- (IfaceTyCon { ifaceTyConName = (getOccString -> name) })
+      HForAllTy ((name, ty0), argflag) ty1 -> mk_ty_rel (cvt ty0) (cvt ty1) ["name" =: getOccString name, "uniq" =: uniquable2text name, "argflag" =: datactor2text argflag]
       HFunTy tyarg tyret -> do
         mk_ty_rel (cvt idx) (cvt tyarg) ["pos" =: (0 :: Int)]
         mk_ty_rel (cvt idx) (cvt tyret) ["pos" =: (1 :: Int)]
@@ -401,7 +405,8 @@ types2cypher path tys = do
 -- hiefile_props :: HieFile -> [(Text, Bolt.Value)]
 hiefile_props (HieFile {..}) = [
     "hs_file" =: T.pack hie_hs_file
-    , "hie_module" =: uniquable2text hie_module
+    , "hie_module" =: (moduleNameString $ moduleName hie_module)
+    , "hie_module_uniq" =: uniquable2text hie_module
   ]
 
 main :: IO ()

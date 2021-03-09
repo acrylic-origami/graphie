@@ -25,10 +25,14 @@ GRAPHIE_AST2TY
   1 pos int
 GraphieIdent
   1 con {Name, ModuleName}
-  1 name str
+  1 name string
+  1 uniq string
 GRAPHIE_AST2CTX
   - GraphieAST
   *-> GraphieCtx
+GRAPHIE_AST2IDENT
+  - GraphieAST
+  *-> GraphieIdent
 GRAPHIE_IDENT2TY
   - GraphieIdent
   *-> GraphieTy
@@ -59,17 +63,18 @@ GRAPHIE_TY_REL
   - GraphieTy
   *-> GraphieTy
   1 path string
-GRAPHIE_NAME2NAME
-  - GraphieAST
-  - GraphieAST
+# GRAPHIE_NAME2NAME
+#   - GraphieAST
+#   - GraphieAST
 GraphieHieFile
   1 hs_file string
   1 hie_module string
+  1 hie_module_uniq string
 GRAPHIE_FILE2AST
   - GraphieHieFile
   *-> GraphieHieAST
 <span>
-  1 ^sp_fn str
+  1 ^sp_fn string
   1 ^sp_l0 int
   1 ^sp_ch0 int
   1 ^sp_lf int
