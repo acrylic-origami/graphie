@@ -1,0 +1,35 @@
+{
+  "dependencies": {
+    "@codemirror/highlight": "^0.18.3",
+    "@codemirror/legacy-modes": "^0.18.0",
+    "@codemirror/rangeset": "^0.18.0",
+    "@codemirror/state": "^0.18.2",
+    "@codemirror/stream-parser": "^0.18.1",
+    "@codemirror/view": "^0.18.3",
+    "@flatten-js/interval-tree": "^1.0.13",
+    "codemirror": "^5.60.0",
+    "es6-map": "^0.1.5",
+    "express": "^4.17.1",
+    "immutable": "^4.0.0-rc.12",
+    "neo4j-driver": "^1.7.8",
+    "preact": "^10.5.12",
+    "preact-compat": "^3.19.0",
+    "promise-polyfill": "^8.2.0",
+    "rx-lite": "^4.0.8",
+    "rxjs": "^6.6.6",
+    "whatwg-fetch": "^3.6.2"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.13.10",
+    "@babel/plugin-proposal-class-properties": "^7.13.0",
+    "@babel/plugin-proposal-object-rest-spread": "^7.13.8",
+    "@babel/plugin-transform-destructuring": "^7.13.0",
+    "@babel/plugin-transform-react-jsx": "^7.12.17",
+    "@babel/plugin-transform-template-literals": "^7.13.0",
+    "@babel/preset-env": "^7.13.10",
+    "babel-loader": "^8.2.2",
+    "web-ext": "^6.0.0",
+    "webpack": "^5.24.4",
+    "webpack-bundle-analyzer": "^4.4.0"
+  }
+}
