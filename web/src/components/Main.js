@@ -5,10 +5,9 @@ import { haskell } from '@codemirror/legacy-modes/mode/haskell'
 import { StreamLanguage } from "@codemirror/stream-parser"
 import { defaultHighlightStyle } from "@codemirror/highlight"
 import { Range, RangeSet } from "@codemirror/rangeset"
-import IntervalTree from '@flatten-js/interval-tree'
 
 const span_msg = StateEffect.define();
-const span_deco = Decoration.mark({ class: 'graphie-span' })
+const span_deco = Decoration.mark({ class: 'graphie-span', inclusive: true })
 const span_ext = StateField.define({
   // Start with an empty set of decorations
   create() { return Decoration.none },
@@ -18,6 +17,8 @@ const span_ext = StateField.define({
   	if(fx.length === 1) { // TODO generalize
   		if(fx[0].value.length > 0)
 		    return Decoration.set(fx[0].value);
+		  else
+		  	return Decoration.none;
   	}
 	  else
 	  	return value;
@@ -26,12 +27,12 @@ const span_ext = StateField.define({
   provide: f => EditorView.decorations.from(f)
 });
 
-function mk_itree(is) {
-	const T = new IntervalTree();
-	for(const i of is) {
-		T.insert(...(Array.isArray(i) ? i : [i]));
-	}
-	return T;
+function is_graphie_span(e) {
+	console.log(e.className)
+	return (e.className && e.className.match(/\s*graphie-span\s*/i)) || (e.parentNode && is_graphie_span(e.parentNode))
+}
+function within([l, h], a) {
+	return a >= l && a <= h;
 }
 
 export default class extends Component {
@@ -39,13 +40,17 @@ export default class extends Component {
 		super(props);
 		this.state = {
 			doc: '',
+			doc_id: 0,
 			spans: [], // new IntervalTree(),
 			cm: null
 		};
 		this.editor_ref = createRef();
 	}
-	sp2o(sp) {
-	  return this.state.cm.state.doc.line(sp[0]).from + sp[1]
+	p2o(p) {
+	  return this.state.cm.state.doc.line(p[0]).from + p[1]
+	}
+	sp2o([l, r]) {
+		return [this.p2o(l), this.p2o(r)]
 	}
 	componentDidMount() {
 		const deco = Decoration.mark({ class: 'marked', tagName: 'span', inclusive: true });
@@ -60,6 +65,7 @@ export default class extends Component {
 		  		// 		deco.range(1, 3),
 		  		// 		deco.range(2, 4),
 		  		// 	]))
+		  		EditorView.updateListener.of(this.cmUpdateHandler)
 	  		],
 		  	readOnly: true
 		  }),
@@ -72,19 +78,23 @@ export default class extends Component {
 			.then(r =>
 				fetch(r.records[0].get('a').properties.sp_fn.replace(/^\/*src\//i, '/'))
 					.then(s => s.text())
-					.then(doc => this.setState({
+					.then(doc => this.setState(s => ({
 						doc,
 						spans: r.records.map(r_ => {
 							const { sp_ch0, sp_chf, sp_l0, sp_lf } = r_.get('a').properties;
-							return [[sp_l0.low, sp_ch0.low], [sp_lf.low, sp_chf.low]]; // TODO check if "low" means low byte, or what
+							return [[sp_l0.low, sp_ch0.low], [sp_lf.low, sp_chf.low], s.doc_id + 1]; // TODO check if "low" means low byte, or what
 						})
-					}))
+					})))
 			)
 	}
+	cmUpdateHandler = updates => {
+		if(!updates.changes.empty) {
+			this.setState(s => ({ doc_id: s.doc_id + 1 })); // assume by the time this callback is called, cm has updated. hopefully this never de-syncs...
+		}
+	}
 	redecorate_spans() {
-		const decos = this.state.spans.map(([l, r]) => span_deco.range(this.sp2o(l), this.sp2o(r)));
-		console.log(decos)
-		const msgs = span_msg.of(decos); // TODO make sure `of` is non-mutating
+		const decos = this.state.spans.filter(([_,__,doc_id]) => doc_id === this.state.doc_id).map(([l, r]) => span_deco.range(this.p2o(l), this.p2o(r)));
+		const msgs = span_msg.of(decos);
 		// TODO have to wait for any doc changes to settle before converting the spans from line-ch formats to pos formats via callback on transactions
 		this.state.cm.dispatch({ effects: msgs });
 	}
@@ -99,15 +109,15 @@ export default class extends Component {
 		if(prevState.doc !== this.state.doc) {
 			this.replace_doc();
 		}
-		if(prevState.spans !== this.state.spans) {
+		if(prevState.spans !== this.state.spans || prevState.doc_id !== this.state.doc_id) {
 			this.redecorate_spans();
 		}
  	}
 	handleEditorClick = e => {
-		if(e.target.className.match(/\s+graphie-span\s+/i)) {
+		if(is_graphie_span(e.target)) {
 			const pos = this.state.cm.posAtCoords({ x: e.clientX, y: e.clientY });
 			if(pos !== null) {
-				this.state.spans.search([pos, pos]);
+				console.log(this.state.spans.filter(sp => within(this.sp2o(sp), pos)));
 			}
 		}
 	}
