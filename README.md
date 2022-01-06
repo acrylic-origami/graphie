@@ -2,6 +2,18 @@
 
 Graphie is a graph database converter and query frontend for HIE files for GHC. It converts the ASTs in HIE files to a Neo4J graph and provides a frontend client for navigating a codebase by following relationships and using graph queries.
 
+## Try it out at <https://graphie.lam.io>!
+
+**How to connect**: This is the standard neo4j web client. Connect with:
+
+- Host: \[scheme: bolt+s://\] `graphie.lam.io`
+- Username: `public`
+- Password: `public`
+
+The graph in this database is the code graph of graphie itself! Explore all the recursive dependencies of this project in all its graphical goodness.
+
+## Details
+
 **Compatibility note**: Graphie is only compatible with Neo4J 3.x, as the BOLT/Neo4J driver for Haskell ([Hasbolt](http://hackage.haskell.org/package/hasbolt)) [isn't yet compatible with Neo4J 4.x](https://github.com/zmactep/hasbolt/issues/21) - the latest BOLT protocol [has only recently been open-sourced](https://github.com/neo4j/neo4j/issues/12361#issuecomment-716483442).
 
 Graphie fulfills a long-standing need I've had for a way to acquaint with a codebase quickly through statistics and data exploration. A notable example is [stacker](https://github.com/acrylic-origami/stacker) which I developed for this purpose too, specifically to identify the dependency set of a given callsite or value: this has been superceded by graphie. The Haskell code using the HIE API to navigate the ASTs can all be distilled into a few short graph queries.
@@ -63,6 +75,7 @@ GRAPHIE_TY_REL
   - GraphieTy
   *-> GraphieTy
   1 path string
+  1 pos int
 # GRAPHIE_NAME2NAME
 #   - GraphieAST
 #   - GraphieAST
